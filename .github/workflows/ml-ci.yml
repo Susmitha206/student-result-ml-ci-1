@@ -35,7 +35,7 @@ jobs:
         with:
           name: student-result-ml-artifacts
           path: |
-            missing_model.pkl
+            student_result_model.pkl
             metrics.json
             student_results.csv
           if-no-files-found: error
