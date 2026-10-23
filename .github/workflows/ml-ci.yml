@@ -1,0 +1,42 @@
+
+name: Student Result ML CI Pipeline
+
+on:
+  push:
+  workflow_dispatch:
+
+jobs:
+  ml-pipeline:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Train ML model
+        run: python train_model.py
+
+      - name: Run quality gate
+        run: python quality_gate.py
+
+      - name: Run pipeline tests
+        run: python -m unittest test_ml_pipeline.py
+
+      - name: Upload ML artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: student-result-ml-artifacts
+          path: |
+            student_result_model.pkl
+            metrics.json
+            student_results.csv
+          if-no-files-found: error
+          retention-days: 7
