@@ -1,15 +1,12 @@
-```yaml
 name: Student Result ML CI-CD
 
 on:
   push:
     branches:
       - main
-
   pull_request:
     branches:
       - main
-
   workflow_dispatch:
 
 permissions:
@@ -63,11 +60,9 @@ jobs:
               echo "Application is ready."
               exit 0
             fi
-
             echo "Waiting for application... attempt $i"
             sleep 2
           done
-
           echo "Application did not become ready."
           docker logs student-result-ml-container
           exit 1
@@ -79,7 +74,6 @@ jobs:
             -H "Content-Type: application/json" \
             -d '{"attendance":90,"internal_marks":85,"assignment_marks":88,"previous_score":80}' \
             http://localhost:5000/predict)
-
           echo "Prediction response: $response"
           echo "$response" | grep -q '"prediction"'
 
@@ -100,7 +94,6 @@ jobs:
           cp requirements.txt release_candidate/
           cp Dockerfile release_candidate/
           cp .dockerignore release_candidate/
-
           cat > release_candidate/DEPLOYMENT.txt <<'EOF'
           Student Result Prediction ML Application
           Run: python app.py
@@ -116,4 +109,3 @@ jobs:
           path: release_candidate/
           if-no-files-found: error
           retention-days: 7
-```
