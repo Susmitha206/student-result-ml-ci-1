@@ -53,10 +53,14 @@ jobs:
           cp student_result_model.pkl release_candidate/
           cp metrics.json release_candidate/
           cp requirements.txt release_candidate/
+          cp Dockerfile release_candidate/
+          cp .dockerignore release_candidate/
           cat > release_candidate/DEPLOYMENT.txt <<'EOF'
           Student Result Prediction ML Application
           Run: python app.py
           Endpoint: POST /predict
+          Docker build: docker build -t student-result-ml:1.0 .
+          Docker run: docker run -d --name student-result-ml-container -p 5000:5000 student-result-ml:1.0
           EOF
 
       - name: Upload release candidate
