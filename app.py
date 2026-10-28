@@ -31,7 +31,15 @@ def health_check():
     return jsonify({
         "status": "ok",
         "service": "student-result-prediction"
-    })
+    }), 200
+
+
+# Health endpoint for Docker and GitHub Actions
+@app.get("/health")
+def health():
+    return jsonify({
+        "status": "healthy"
+    }), 200
 
 
 @app.post("/predict")
@@ -66,7 +74,7 @@ def predict():
     return jsonify({
         "prediction": prediction,
         "prediction_code": prediction_code
-    })
+    }), 200
 
 
 if __name__ == "__main__":
