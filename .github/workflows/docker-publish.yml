@@ -19,6 +19,17 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Train ML model
+        run: python train_model.py
+
       - name: Log in to GitHub Container Registry
         uses: docker/login-action@v3
         with:
@@ -43,9 +54,14 @@ jobs:
             fi
             sleep 2
           done
-          echo "Health check failed"
           docker logs student-result-test
           exit 1
+
+      - name: Test prediction endpoint
+        run: |
+          curl --fail -X POST http://localhost:8000/predict \
+            -H "Content-Type: application/json" \
+            -d '{"attendance":90,"internal_marks":85,"assignment_marks":90,"previous_score":82}'
 
       - name: Stop and remove test container
         if: always()
