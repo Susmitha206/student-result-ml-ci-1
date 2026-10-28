@@ -28,16 +28,17 @@ jobs:
 
       - name: Build Docker image
         run: |
-          docker build -t ghcr.io/susmithavanama/student-result-ml:latest .
+          docker build -t ghcr.io/susmitha206/student-result-ml:latest .
 
       - name: Start container
         run: |
-          docker run -d --name student-result-test -p 8000:5000 ghcr.io/susmithavanama/student-result-ml:latest
+          docker run -d --name student-result-test -p 8000:5000 ghcr.io/susmitha206/student-result-ml:latest
 
       - name: Test health endpoint
         run: |
           for i in {1..15}; do
             if curl --fail http://localhost:8000/health; then
+              echo "Health check passed"
               exit 0
             fi
             sleep 2
@@ -52,6 +53,6 @@ jobs:
 
       - name: Publish Docker image
         run: |
-          docker push ghcr.io/susmithavanama/student-result-ml:latest
-          docker tag ghcr.io/susmithavanama/student-result-ml:latest ghcr.io/susmithavanama/student-result-ml:sha-${{ github.sha }}
-          docker push ghcr.io/susmithavanama/student-result-ml:sha-${{ github.sha }}
+          docker push ghcr.io/susmitha206/student-result-ml:latest
+          docker tag ghcr.io/susmitha206/student-result-ml:latest ghcr.io/susmitha206/student-result-ml:sha-${{ github.sha }}
+          docker push ghcr.io/susmitha206/student-result-ml:sha-${{ github.sha }}
