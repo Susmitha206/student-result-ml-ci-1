@@ -1,3 +1,4 @@
+
 name: Student Result ML CI-CD
 
 on:
@@ -11,6 +12,7 @@ on:
 
 permissions:
   contents: read
+  packages: write
 
 jobs:
   train-test-containerize:
@@ -18,10 +20,10 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v7
+        uses: actions/checkout@v4
 
       - name: Set up Python
-        uses: actions/setup-python@v7
+        uses: actions/setup-python@v5
         with:
           python-version: '3.11'
 
@@ -63,7 +65,6 @@ jobs:
             echo "Waiting for application... attempt $i"
             sleep 2
           done
-          echo "Application did not become ready."
           docker logs student-result-ml-container
           exit 1
 
@@ -84,6 +85,34 @@ jobs:
       - name: Stop and remove Docker container
         if: always()
         run: docker rm -f student-result-ml-container || true
+
+      - name: Log in to GitHub Container Registry
+        if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and publish Docker image
+        if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+        run: |
+          IMAGE="ghcr.io/${GITHUB_REPOSITORY_OWNER,,}/student-result-ml:latest"
+          docker build -t "$IMAGE" .
+          docker push "$IMAGE"
+
+      - name: Trigger Render deployment
+        if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+        env:
+          RENDER_DEPLOY_HOOK: ${{ secrets.RENDER_DEPLOY_HOOK }}
+        run: |
+          if [ -z "$RENDER_DEPLOY_HOOK" ]; then
+            echo "Render deploy hook secret is missing."
+            exit 1
+          fi
+          curl --fail --silent --show-error \
+            "$RENDER_DEPLOY_HOOK"
+          echo "Render deployment triggered."
 
       - name: Prepare release candidate
         run: |
